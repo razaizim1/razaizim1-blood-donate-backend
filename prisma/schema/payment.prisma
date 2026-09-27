@@ -1,0 +1,23 @@
+model Payment {
+  id            String        @id @default(uuid())
+  requestId     String
+  request       BloodRequest  @relation(fields: [requestId], references: [id])
+  userId        String
+  user          User          @relation(fields: [userId], references: [id])
+  amount        Int
+  status        PaymentStatus @default(INITIATED)
+  bkashPaymentId String?      @unique
+  trxId         String?
+  invoiceNumber String        @unique
+  bkashURL      String?
+  payerReference String?
+  gatewayResponse Json?
+  paidAt        DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([userId, status])
+  @@index([requestId])
+  @@index([status])
+  @@map("payments")
+}
