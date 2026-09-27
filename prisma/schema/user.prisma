@@ -1,0 +1,58 @@
+model User {
+  id            String       @id @default(uuid())
+  name          String
+  email         String       @unique
+  password      String?
+  phone         String?
+  googleId      String?      @unique
+  authProvider  AuthProvider @default(CREDENTIAL)
+  emailVerified Boolean      @default(false)
+  role          Role
+  status        UserStatus   @default(ACTIVE)
+  imageUrl      String       @default("")
+  district      String?
+  address       String?
+  isDeleted     Boolean      @default(false)
+  deletedAt     DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  donorProfile   DonorProfile?
+  patientProfile PatientProfile?
+  bloodRequests  BloodRequest[] @relation("PatientRequests")
+  donations      Donation[]     @relation("DonorDonations")
+  payments       Payment[]
+  auditLogs      AuditLog[]
+  refreshTokens  RefreshToken[]
+  passwordResets PasswordReset[]
+
+  @@index([role, status])
+  @@index([district])
+  @@index([isDeleted])
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model PasswordReset {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, used])
+  @@map("password_resets")
+}
