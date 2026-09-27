@@ -1,0 +1,45 @@
+model BloodRequest {
+  id            String          @id @default(uuid())
+  patientId     String
+  patient       User            @relation("PatientRequests", fields: [patientId], references: [id])
+  bloodGroup    BloodGroup
+  units         Int             @default(1)
+  urgency       RequestUrgency  @default(URGENT)
+  hospitalName  String
+  district      String
+  area          String?
+  contactPhone  String
+  reason        String
+  neededBy      DateTime
+  status        RequestStatus   @default(PENDING_PAYMENT)
+  serviceFee    Int
+  rejectionNote String?
+  deletedAt     DateTime?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  donation Donation?
+  payments Payment[]
+
+  @@index([status, bloodGroup, district])
+  @@index([patientId, status])
+  @@index([deletedAt])
+  @@index([neededBy])
+  @@map("blood_requests")
+}
+
+model Donation {
+  id          String         @id @default(uuid())
+  requestId   String         @unique
+  request     BloodRequest   @relation(fields: [requestId], references: [id])
+  donorId     String
+  donor       User           @relation("DonorDonations", fields: [donorId], references: [id])
+  status      DonationStatus @default(ACCEPTED)
+  acceptedAt  DateTime       @default(now())
+  completedAt DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([donorId, status])
+  @@map("donations")
+}
